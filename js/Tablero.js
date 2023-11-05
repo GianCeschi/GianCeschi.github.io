@@ -43,15 +43,11 @@ class Tablero {
             this.ctx.arc(x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 0, Math.PI * 2);
             this.ctx.fill();
           if (this.celdas[fila][col] === 1) {
-            this.ctx.fillStyle = 'red';
-            this.ctx.beginPath();
-            this.ctx.arc(x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 0, Math.PI * 2);
-            this.ctx.fill();
+            this.ficha = new Ficha(this.ctx,x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 'img/fichaIronMan.png');
+            this.ficha.dibujar();
           } else if (this.celdas[fila][col] === 2) {
-            this.ctx.fillStyle = 'yellow';
-            this.ctx.beginPath();
-            this.ctx.arc(x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 0, Math.PI * 2);
-            this.ctx.fill();
+            this.ficha = new Ficha(this.ctx,x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 'img/fichaLoki.jpg');
+            this.ficha.dibujar();
           }
           
           this.ctx.strokeStyle = "#f34545"; //COLOR DE LAS LINEAS DEL TABLERO
@@ -197,14 +193,15 @@ class Tablero {
     if (verificarGanadorVertical(tablero, 1) || verificarGanadorHorizontal(tablero, 1) || verificarGanadorDiagonal(tablero, 1)) {
       // El jugador 1 gana.
       alert("JUGADOR 1 GANA!");
-      
       console.log("¡Jugador 1 gana!");
       reiniciarJuego(tablero);
+      tablero.inicializarFicha(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
     } else if (verificarGanadorVertical(tablero, 2) || verificarGanadorHorizontal(tablero, 2) || verificarGanadorDiagonal(tablero, 2)) {
       // El jugador 2 gana.
       alert("JUGADOR 2 GANA!");
       console.log("¡Jugador 2 gana!");
       reiniciarJuego(tablero);
+      tablero.inicializarFicha();
     } else {
       // No hay ganador todavía.
     }
