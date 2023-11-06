@@ -16,7 +16,7 @@ class Tablero {
 
     this.tiempoRestante = 60; // Tiempo inicial en segundos
     this.temporizador = document.getElementById('tiempo');
-
+    //PRUEBA
 
     // Inicializa el temporizador
     this.inicializarTemporizador();
