@@ -15,7 +15,7 @@ class Tablero {
     this.fichasJugador1 = [];  //this.columnas * this.filas / 2; //PARA CADA JUGADOR
     this.fichasJugador2 = [];
     this.fichaSeleccionada = null;
-  
+    //prueba
 
     this.inicializarTablero();
     this.dibujarTablero();
