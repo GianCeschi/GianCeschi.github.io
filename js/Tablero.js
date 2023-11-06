@@ -10,23 +10,55 @@ class Tablero {
     this.anchoCelda = this.tableroWidth / this.columnas;
     this.altoCelda = this.tableroHeight / this.filas;
     this.jugadorActual = 1;
-    this.imgJ1 =
     this.FICHASINICIALES = this.columnas * this.filas / 2; //PARA CADA JUGADOR
     this.fichasJugador1 = [];  //this.columnas * this.filas / 2; //PARA CADA JUGADOR
     this.fichasJugador2 = [];
-    this.fichaSeleccionada = null;
-    //prueba
 
+    this.tiempoRestante = 60; // Tiempo inicial en segundos
+    this.temporizador = document.getElementById('tiempo');
+
+
+    // Inicializa el temporizador
+    this.inicializarTemporizador();
+    
+    this.fichaSeleccionada = null;
+   
     this.inicializarTablero();
     this.dibujarTablero();
+    this.inicializarFichas();
   }
+
+  inicializarTemporizador() {
+    clearInterval(this.temporizadorInterval); // Detiene el intervalo anterior si existe. Porque sino avanza cada vez mas rapido el reloj
+  
+    const intervalo = 1000; // Intervalo de actualización del temporizador en milisegundos (1 segundo)
+  
+    const actualizarTemporizador = () => {
+      this.tiempoRestante--;
+  
+      // Actualiza el contenido del div del temporizador
+      this.temporizador.textContent = ` ${this.tiempoRestante} `;
+  
+      if (this.tiempoRestante === 0) {
+        // Cuando el tiempo llega a cero, reinicia el temporizador y muestra un mensaje
+        alert("¡Se terminó el tiempo!");
+        this.tiempoRestante = 60; // Reinicia el tiempo a 60 segundos
+        this.inicializarTemporizador(); // Reinicia el temporizador
+        reiniciarJuego(this);
+      }
+    };
+  
+    // Inicia el temporizador y lo actualiza en cada intervalo
+    this.temporizadorInterval = setInterval(actualizarTemporizador, intervalo);
+  }
+  
+
 
   inicializarTablero() {
     for (let fila = 0; fila < this.filas; fila++) {
       this.celdas[fila] = [];
       for (let col = 0; col < this.columnas; col++) {
         this.celdas[fila][col] = 0;
-        //console.log(this.celdas);
       }
     }
   }
@@ -59,103 +91,128 @@ class Tablero {
 
 
   //INICIALIZAMOS LA FICHA PARA EL JUGADOR SELECCIONAR
-  inicializarFicha() {
-    // Declarar un arreglo para almacenar las fichas
-    this.fichas = [];
-
-    // Definir la cantidad de fichas que deseas crear
-    const numFichas = this.FICHASINICIALES; // Cambia este valor según la cantidad deseada
-
-    const espaciado = 10;
-    const tamano = 30; // Tamaño de cada ficha
-    const imagenSrc = 'img/fichaIronMan.png'; // Ruta de la imagen
+  inicializarFichas() {
+    // Inicializar las fichas para ambos jugadores
+    const numFichas = this.FICHASINICIALES;
 
     for (let i = 0; i < numFichas; i++) {
-      // Calcular la posición y otros atributos para cada ficha
-      const x = this.canvas.width - 50;
-      const y = 40 + i * espaciado; // Espaciado mínimo entre las fichas (altura de la ficha)
+      const x1 = this.canvas.width - 50;
+      const x2 = this.canvas.width - 200;; // Cambio la posición inicial del jugador 2
+      const y = 40 + i * 10; // Ajustar el espaciado
 
-      // Crear una instancia de Ficha y agregarla al arreglo
-      const ficha = new Ficha(this.ctx, x, y, tamano, imagenSrc);
-      this.fichas.push(ficha);
+      // Crear una instancia de Ficha para cada jugador y agregarlas a los arreglos correspondientes
+      const fichaJugador1 = new Ficha(this.ctx, x1, y, 30, 'img/fichaIronMan.png');
+      this.fichasJugador1.push(fichaJugador1);
 
-      // Dibujar la ficha recién creada
-      ficha.dibujar();
+      const fichaJugador2 = new Ficha(this.ctx, x2, y, 30, 'img/fichaLoki.jpg');
+      this.fichasJugador2.push(fichaJugador2);
     }
-
-
-    // Declarar una variable para almacenar la ficha seleccionada
-    let fichaSeleccionada = null;
-
+  
     this.canvas.addEventListener('mousedown', (event) => {
-      const x = event.offsetX;
-      const y = event.offsetY;
-
-      // Verificar si se hizo clic en alguna ficha
-      for (const ficha of this.fichas) {
-        if (ficha.verificarClic(x, y)) {
-          fichaSeleccionada = ficha;
-          // Calcular el offset para evitar que la ficha salte al hacer clic
-          this.offsetX = x - ficha.x;
-          this.offsetY = y - ficha.y;
-        }
-      }
-    });
-
-    this.canvas.addEventListener('mousemove', (event) => {
-      if (fichaSeleccionada) {
+      if (this.jugadorActual === 1) {
         const x = event.offsetX;
         const y = event.offsetY;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.dibujarTablero();
-
-        // Mover la ficha seleccionada
-        fichaSeleccionada.x = x - this.offsetX;
-        fichaSeleccionada.y = y - this.offsetY;
-
-        // Dibujar todas las fichas nuevamente
-        for (const ficha of this.fichas) {
-          ficha.dibujar();
+    
+        // Verificar si se hizo clic en una ficha del jugador 1
+        for (const ficha of this.fichasJugador1) {
+          if (ficha.verificarClic(x, y)) {
+            this.fichaSeleccionada = ficha;
+            this.fichasJugador1 = this.fichasJugador1.filter((f) => f !== ficha); // Remover la ficha del arreglo
+            break;
+          }
+        }
+      } else if (this.jugadorActual === 2) {
+        const x = event.offsetX;
+        const y = event.offsetY;
+    
+        // Verificar si se hizo clic en una ficha del jugador 2
+        for (const ficha of this.fichasJugador2) {
+          if (ficha.verificarClic(x, y)) {
+            this.fichaSeleccionada = ficha;
+            this.fichasJugador2 = this.fichasJugador2.filter((f) => f !== ficha); // Remover la ficha del arreglo
+            break;
+          }
         }
       }
     });
+    
+   this.canvas.addEventListener('mousemove', (event) => {
+  const x = event.offsetX;
+  const y = event.offsetY;
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  this.dibujarTablero();
+  
+  // Dibujar todas las fichas de ambos jugadores
+  for (const ficha of this.fichasJugador1) {
+    ficha.dibujar();
+  }
+  for (const ficha of this.fichasJugador2) {
+    ficha.dibujar();
+  }
 
-    this.canvas.addEventListener('mouseup', () => {
-      if (fichaSeleccionada) {
-        fichaSeleccionada = null;
+  if (this.fichaSeleccionada) {
+    this.fichaSeleccionada.x = x;
+    this.fichaSeleccionada.y = y;
+    this.fichaSeleccionada.dibujar();
+  }
+});
 
-        // Verificar si se soltó en la zona del tablero y realizar la jugada.
-        const col = Math.floor(fichaSeleccionada.x / this.anchoCelda);
-        
-        // this.jugar(col);
-        verificarGanador(this);
+    
+this.canvas.addEventListener('mouseup', () => {
+  if (this.fichaSeleccionada) {
+    const col = Math.floor(this.fichaSeleccionada.x / this.anchoCelda);
+
+    if (col >= 0 && col < this.columnas) {
+      // La ficha se suelta en una celda válida del tablero
+      this.jugar(col);
+      verificarGanador(this);
+    } else {
+      // La ficha se suelta fuera del tablero, devolverla al arreglo
+      if (this.jugadorActual === 1) {
+        this.fichasJugador1.push(this.fichaSeleccionada);
+      } else if (this.jugadorActual === 2) {
+        this.fichasJugador2.push(this.fichaSeleccionada);
       }
-    });
+    }
+
+    this.fichaSeleccionada = null;
+  }
+});
+
   }
 
 
-  jugar(col) {
+  colocarFichaEnTablero(ficha, col) {
     for (let fila = this.filas - 1; fila >= 0; fila--) {
       if (this.celdas[fila][col] === 0) {
         this.celdas[fila][col] = this.jugadorActual;
         this.dibujarTablero();
-
-        // Aquí puedes agregar la lógica para verificar si hay un ganador o empate.
-        // Por ejemplo, puedes implementar una función que revise si hay 4 fichas del mismo jugador en fila, columna o diagonal.
-
-        this.jugadorActual = this.jugadorActual === 1 ? 2 : 1; // Alternar entre jugadores.
+        ficha.dibujar();
         break;
       }
     }
   }
+
+  jugar(col) {
+    if (this.jugadorActual === 1 && this.fichasJugador1.length > 0) {
+      const ficha = this.fichasJugador1.pop(); // Obtener la ficha del jugador 1
+      this.colocarFichaEnTablero(ficha, col);
+      this.jugadorActual = 2; // Cambiar al jugador 2
+    } else if (this.jugadorActual === 2 && this.fichasJugador2.length > 0) {
+      const ficha = this.fichasJugador2.pop(); // Obtener la ficha del jugador 2
+      this.colocarFichaEnTablero(ficha, col);
+      this.jugadorActual = 1; // Cambiar al jugador 1
+    }
+  }
+
+
 }
 
 const tablero = new Tablero();
 
-tablero.inicializarFicha(); // Inicializa la ficha arrastrable
+tablero.inicializarFicha(); // Inicializa la ficha arrastrable 
 
-// Puedes agregar eventos de clic para permitir que los jugadores seleccionen una columna para jugar.
-// Por ejemplo:
+// Se pueden agregar eventos de clic para permitir que los jugadores seleccionen una columna para jugar.
 tablero.canvas.addEventListener('click', (event) => {
   const col = Math.floor(event.offsetX / tablero.anchoCelda);
   tablero.jugar(col);
@@ -165,7 +222,7 @@ tablero.canvas.addEventListener('click', (event) => {
 
 function verificarGanadorVertical(tablero, jugador) {
   for (let col = 0; col < tablero.columnas; col++) {
-    for (let fila = 0; fila <= tablero.filas - 4; fila++) {
+    for (let fila = 0; fila <= tablero.filas - 4; fila++) {  //TENGO QUE CAMBIAR ACA SI CAMBIA EL CANTIDAD EN LINEA
       if (
         tablero.celdas[fila][col] === jugador &&
         tablero.celdas[fila + 1][col] === jugador &&
@@ -229,13 +286,13 @@ function verificarGanador(tablero) {
     alert("JUGADOR 1 GANA!");
     console.log("¡Jugador 1 gana!");
     reiniciarJuego(tablero);
-    tablero.inicializarFicha(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
+    tablero.inicializarFichas(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
   } else if (verificarGanadorVertical(tablero, 2) || verificarGanadorHorizontal(tablero, 2) || verificarGanadorDiagonal(tablero, 2)) {
     // El jugador 2 gana.
     alert("JUGADOR 2 GANA!");
     console.log("¡Jugador 2 gana!");
     reiniciarJuego(tablero);
-    tablero.inicializarFicha();
+    tablero.inicializarFichas(); 
   } else {
     // No hay ganador todavía.
   }

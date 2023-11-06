@@ -804,3 +804,19 @@ h2 {
   background-color: #091021;
 }
 
+.imagen-juego{
+  width: 800px;
+  border-radius: 5px;
+}
+
+.temporizador{
+  background-color: #091021;
+  color: #f02b2b;
+  width: 30px;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  margin: 10px;
+  margin-left: 350px;
+  border-radius: 5px;
+}
