@@ -11,12 +11,12 @@ class Tablero {
     this.altoCelda = this.tableroHeight / this.filas;
     this.jugadorActual = 1;
     this.FICHASINICIALES = this.columnas * this.filas / 2; //PARA CADA JUGADOR
-    this.fichasJugador1 = [];  //this.columnas * this.filas / 2; //PARA CADA JUGADOR
+    this.fichasJugador1 = [];  
     this.fichasJugador2 = [];
 
     this.tiempoRestante = 60; // Tiempo inicial en segundos
     this.temporizador = document.getElementById('tiempo');
-    //PRUEBA
+    
 
     // Inicializa el temporizador
     this.inicializarTemporizador();
@@ -45,6 +45,7 @@ class Tablero {
         this.tiempoRestante = 60; // Reinicia el tiempo a 60 segundos
         this.inicializarTemporizador(); // Reinicia el temporizador
         reiniciarJuego(this);
+        this.inicializarFichas(); //APARECEN INMEDIATAMENTE SE REINICIA EL JUEGO POR QUEDARSE SIN TIEMPO.
       }
     };
   
@@ -294,7 +295,7 @@ function verificarGanador(tablero) {
     reiniciarJuego(tablero);
     tablero.inicializarFichas(); 
   } else {
-    // No hay ganador todavía.
+    // No hay ganador todavía. HACER EMPATE!
   }
 }
 
