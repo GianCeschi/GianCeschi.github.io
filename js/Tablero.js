@@ -34,7 +34,6 @@ class Tablero {
     const intervalo = 1000; // Intervalo de actualización del temporizador en milisegundos (1 segundo)
   
     const actualizarTemporizador = () => {
-      this.tiempoRestante--;
   
       // Actualiza el contenido del div del temporizador
       this.temporizador.textContent = ` ${this.tiempoRestante} `;
@@ -46,6 +45,9 @@ class Tablero {
         this.inicializarTemporizador(); // Reinicia el temporizador
         reiniciarJuego(this);
         this.inicializarFichas(); //APARECEN INMEDIATAMENTE SE REINICIA EL JUEGO POR QUEDARSE SIN TIEMPO.
+      }
+      else {
+        this.tiempoRestante--; // Resta después
       }
     };
   
@@ -99,7 +101,7 @@ class Tablero {
     for (let i = 0; i < numFichas; i++) {
       const x1 = this.canvas.width - 50;
       const x2 = this.canvas.width - 200;; // Cambio la posición inicial del jugador 2
-      const y = 40 + i * 10; // Ajustar el espaciado
+      let y = 40 + i * 10; // Ajustar el espaciado
 
       // Crear una instancia de Ficha para cada jugador y agregarlas a los arreglos correspondientes
       const fichaJugador1 = new Ficha(this.ctx, x1, y, 30, 'img/fichaIronMan.png');
