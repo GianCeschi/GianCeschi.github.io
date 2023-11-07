@@ -5,18 +5,17 @@ class Tablero {
     this.celdas = [];
     this.tableroWidth = 500; // Ancho deseado del tablero
     this.tableroHeight = 500; // Alto deseado del tablero  ESTO PARA DARLE UN TAMAÑO AL TABLERO QUE NO SEA DE TODO EL CANVAS
-    this.filas = 6;
-    this.columnas = 7;
+   
     this.anchoCelda = this.tableroWidth / this.columnas;
     this.altoCelda = this.tableroHeight / this.filas;
     this.jugadorActual = 1;
     this.FICHASINICIALES = this.columnas * this.filas / 2; //PARA CADA JUGADOR
     this.fichasJugador1 = [];  
     this.fichasJugador2 = [];
-    
+    this.juegoTerminado = false; //PARA FRENAR EL TEMPORIZADOR SI HAY GANADOR
 
     // Inicializa el temporizador
-    this.inicializarTemporizador();
+    //this.inicializarTemporizador();
     
     this.fichaSeleccionada = null;
    
@@ -76,13 +75,13 @@ class Tablero {
         const y = fila * this.altoCelda;
         this.ctx.fillStyle = 'gray';    //ESTO ES PARA QUE SE DIBUJEN LOS CIRCULOS DEL TABLERO
         this.ctx.beginPath();
-        this.ctx.arc(x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 0, Math.PI * 2);
+        this.ctx.arc(x + this.anchoCelda / 2, y + this.altoCelda / 2, 23, 0, Math.PI * 2);
         this.ctx.fill();
         if (this.celdas[fila][col] === 1) {
-          this.ficha = new Ficha(this.ctx, x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 'img/fichaIronMan.png');
+          this.ficha = new Ficha(this.ctx, x + this.anchoCelda / 2, y + this.altoCelda / 2, 23, 'img/fichaIronMan.png');
           this.ficha.dibujar();
         } else if (this.celdas[fila][col] === 2) {
-          this.ficha = new Ficha(this.ctx, x + this.anchoCelda / 2, y + this.altoCelda / 2, 30, 'img/fichaLoki.jpg');
+          this.ficha = new Ficha(this.ctx, x + this.anchoCelda / 2, y + this.altoCelda / 2, 23, 'img/fichaLoki.jpg');
           this.ficha.dibujar();
         }
 
@@ -104,10 +103,10 @@ class Tablero {
       let y = 40 + i * 10; // Ajustar el espaciado
 
       // Crear una instancia de Ficha para cada jugador y agregarlas a los arreglos correspondientes
-      const fichaJugador1 = new Ficha(this.ctx, x1, y, 30, 'img/fichaIronMan.png');
+      const fichaJugador1 = new Ficha(this.ctx, x1, y, 23, 'img/fichaIronMan.png');
       this.fichasJugador1.push(fichaJugador1);
 
-      const fichaJugador2 = new Ficha(this.ctx, x2, y, 30, 'img/fichaLoki.jpg');
+      const fichaJugador2 = new Ficha(this.ctx, x2, y, 23, 'img/fichaLoki.jpg');
       this.fichasJugador2.push(fichaJugador2);
     }
   
@@ -189,7 +188,6 @@ this.canvas.addEventListener('mouseup', () => {
         this.celdas[fila][col] = this.jugadorActual;
         this.fichaSeleccionada = null;
         this.dibujarTablero();
-        //ficha.dibujar();
         break;
       }
     }
@@ -217,6 +215,36 @@ btnReiniciar.addEventListener('click', function() {
   reiniciarJuego(tablero); 
 });
 
+const botonesJugar = document.querySelectorAll('#jugar');
+
+botonesJugar.forEach((boton) => {
+  boton.addEventListener('click', (event) => {
+    const valor = parseInt(event.target.value);
+    const filas = valor + 2; // Ajusta las filas según el valor seleccionado
+    const columnas = valor + 3; // Ajusta las columnas según el valor seleccionado
+    tablero.numeroEnLinea = valor; // Configura el número en línea según el valor seleccionado
+
+     // Mostrar el canvas cuando se selecciona una opcion de juego!!
+     const canvas = document.getElementById('canvas');
+     canvas.style.display = 'block';
+
+    reiniciarJuegoConNuevasDimensiones(tablero, filas, columnas);
+  });
+});
+
+function reiniciarJuegoConNuevasDimensiones(tablero, filas, columnas) {
+  // Reinicia el juego con las nuevas dimensiones
+  tablero.filas = filas;
+  tablero.columnas = columnas;
+  tablero.anchoCelda = tablero.tableroWidth / tablero.columnas;
+  tablero.altoCelda = tablero.tableroHeight / tablero.filas;
+
+  tablero.FICHASINICIALES = columnas * filas / 2;
+
+  // Limpia y reinicia el juego
+  reiniciarJuego(tablero);
+}
+
 const tablero = new Tablero();
 
 tablero.inicializarFicha(); // Inicializa la ficha arrastrable 
@@ -231,13 +259,16 @@ tablero.canvas.addEventListener('click', (event) => {
 
 function verificarGanadorVertical(tablero, jugador) {
   for (let col = 0; col < tablero.columnas; col++) {
-    for (let fila = 0; fila <= tablero.filas - 4; fila++) {  //TENGO QUE CAMBIAR ACA SI CAMBIA EL CANTIDAD EN LINEA
-      if (
-        tablero.celdas[fila][col] === jugador &&
-        tablero.celdas[fila + 1][col] === jugador &&
-        tablero.celdas[fila + 2][col] === jugador &&
-        tablero.celdas[fila + 3][col] === jugador
-      ) {
+    for (let fila = 0; fila <= tablero.filas - tablero.numeroEnLinea; fila++) {
+      // Verifica si hay "tablero.numeroEnLinea" fichas iguales en una columna
+      let ganador = true;
+      for (let i = 0; i < tablero.numeroEnLinea; i++) {
+        if (tablero.celdas[fila + i][col] !== jugador) {
+          ganador = false;
+          break;
+        }
+      }
+      if (ganador) {
         return true;
       }
     }
@@ -247,13 +278,16 @@ function verificarGanadorVertical(tablero, jugador) {
 
 function verificarGanadorHorizontal(tablero, jugador) {
   for (let fila = 0; fila < tablero.filas; fila++) {
-    for (let col = 0; col <= tablero.columnas - 4; col++) {
-      if (
-        tablero.celdas[fila][col] === jugador &&
-        tablero.celdas[fila][col + 1] === jugador &&
-        tablero.celdas[fila][col + 2] === jugador &&
-        tablero.celdas[fila][col + 3] === jugador
-      ) {
+    for (let col = 0; col <= tablero.columnas - tablero.numeroEnLinea; col++) {
+      // Verifica si hay "tablero.numeroEnLinea" fichas iguales en una fila
+      let ganador = true;
+      for (let i = 0; i < tablero.numeroEnLinea; i++) {
+        if (tablero.celdas[fila][col + i] !== jugador) {
+          ganador = false;
+          break;
+        }
+      }
+      if (ganador) {
         return true;
       }
     }
@@ -262,25 +296,29 @@ function verificarGanadorHorizontal(tablero, jugador) {
 }
 
 function verificarGanadorDiagonal(tablero, jugador) {
-  for (let fila = 0; fila <= tablero.filas - 4; fila++) {
-    for (let col = 0; col <= tablero.columnas - 4; col++) {
-      // Diagonal hacia arriba y a la derecha
-      if (
-        tablero.celdas[fila][col] === jugador &&
-        tablero.celdas[fila + 1][col + 1] === jugador &&
-        tablero.celdas[fila + 2][col + 2] === jugador &&
-        tablero.celdas[fila + 3][col + 3] === jugador
-      ) {
+  for (let fila = 0; fila <= tablero.filas - tablero.numeroEnLinea; fila++) {
+    for (let col = 0; col <= tablero.columnas - tablero.numeroEnLinea; col++) {
+      // Verifica si hay "tablero.numeroEnLinea" fichas iguales en una diagonal hacia arriba y a la derecha
+      let ganador = true;
+      for (let i = 0; i < tablero.numeroEnLinea; i++) {
+        if (tablero.celdas[fila + i][col + i] !== jugador) {
+          ganador = false;
+          break;
+        }
+      }
+      if (ganador) {
         return true;
       }
 
-      // Diagonal hacia arriba y a la izquierda
-      if (
-        tablero.celdas[fila][col + 3] === jugador &&
-        tablero.celdas[fila + 1][col + 2] === jugador &&
-        tablero.celdas[fila + 2][col + 1] === jugador &&
-        tablero.celdas[fila + 3][col] === jugador
-      ) {
+      // Verifica si hay "tablero.numeroEnLinea" fichas iguales en una diagonal hacia arriba y a la izquierda
+      ganador = true;
+      for (let i = 0; i < tablero.numeroEnLinea; i++) {
+        if (tablero.celdas[fila + i][col + tablero.numeroEnLinea - 1 - i] !== jugador) {
+          ganador = false;
+          break;
+        }
+      }
+      if (ganador) {
         return true;
       }
     }
@@ -289,19 +327,20 @@ function verificarGanadorDiagonal(tablero, jugador) {
 }
 
 
+
 function verificarGanador(tablero) {
   if (verificarGanadorVertical(tablero, 1) || verificarGanadorHorizontal(tablero, 1) || verificarGanadorDiagonal(tablero, 1)) {
     // El jugador 1 gana.
     alert("JUGADOR 1 GANA!");
     console.log("¡Jugador 1 gana!");
-    //reiniciarJuego(tablero);
-   // tablero.inicializarFichas(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
+    tablero.juegoTerminado = true; // Establece el juego como terminado
+    clearInterval(tablero.temporizadorInterval); // Paro el temporizador
   } else if (verificarGanadorVertical(tablero, 2) || verificarGanadorHorizontal(tablero, 2) || verificarGanadorDiagonal(tablero, 2)) {
     // El jugador 2 gana.
     alert("JUGADOR 2 GANA!");
     console.log("¡Jugador 2 gana!");
-    //reiniciarJuego(tablero);
-   // tablero.inicializarFichas(); 
+    tablero.juegoTerminado = true; // Establece el juego como terminado
+    clearInterval(tablero.temporizadorInterval); // Paro el temporizador
   } else {
     // No hay ganador todavía. HACER EMPATE!
   }
