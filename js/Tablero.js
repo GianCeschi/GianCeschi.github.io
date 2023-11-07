@@ -13,9 +13,6 @@ class Tablero {
     this.FICHASINICIALES = this.columnas * this.filas / 2; //PARA CADA JUGADOR
     this.fichasJugador1 = [];  
     this.fichasJugador2 = [];
-
-    this.tiempoRestante = 60; // Tiempo inicial en segundos
-    this.temporizador = document.getElementById('tiempo');
     
 
     // Inicializa el temporizador
@@ -29,6 +26,9 @@ class Tablero {
   }
 
   inicializarTemporizador() {
+
+    this.tiempoRestante = 60; // Tiempo inicial en segundos
+    this.temporizador = document.getElementById('tiempo');
     clearInterval(this.temporizadorInterval); // Detiene el intervalo anterior si existe. Porque sino avanza cada vez mas rapido el reloj
   
     const intervalo = 1000; // Intervalo de actualización del temporizador en milisegundos (1 segundo)
@@ -120,7 +120,6 @@ class Tablero {
         for (const ficha of this.fichasJugador1) {
           if (ficha.verificarClic(x, y)) {
             this.fichaSeleccionada = ficha;
-            this.fichasJugador1 = this.fichasJugador1.filter((f) => f !== ficha); // Remover la ficha del arreglo
             break;
           }
         }
@@ -132,7 +131,6 @@ class Tablero {
         for (const ficha of this.fichasJugador2) {
           if (ficha.verificarClic(x, y)) {
             this.fichaSeleccionada = ficha;
-            this.fichasJugador2 = this.fichasJugador2.filter((f) => f !== ficha); // Remover la ficha del arreglo
             break;
           }
         }
@@ -167,7 +165,7 @@ this.canvas.addEventListener('mouseup', () => {
 
     if (col >= 0 && col < this.columnas) {
       // La ficha se suelta en una celda válida del tablero
-      this.jugar(col);
+      this.jugar(col,this.fichaSeleccionada);
       verificarGanador(this);
     } else {
       // La ficha se suelta fuera del tablero, devolverla al arreglo
@@ -189,20 +187,21 @@ this.canvas.addEventListener('mouseup', () => {
     for (let fila = this.filas - 1; fila >= 0; fila--) {
       if (this.celdas[fila][col] === 0) {
         this.celdas[fila][col] = this.jugadorActual;
+        this.fichaSeleccionada = null;
         this.dibujarTablero();
-        ficha.dibujar();
+        //ficha.dibujar();
         break;
       }
     }
   }
 
-  jugar(col) {
+  jugar(col,ficha) {
     if (this.jugadorActual === 1 && this.fichasJugador1.length > 0) {
-      const ficha = this.fichasJugador1.pop(); // Obtener la ficha del jugador 1
+      this.fichasJugador1 = this.fichasJugador1.filter((f) => f !== ficha); // Remover la ficha del arreglo
       this.colocarFichaEnTablero(ficha, col);
       this.jugadorActual = 2; // Cambiar al jugador 2
     } else if (this.jugadorActual === 2 && this.fichasJugador2.length > 0) {
-      const ficha = this.fichasJugador2.pop(); // Obtener la ficha del jugador 2
+      this.fichasJugador2 = this.fichasJugador2.filter((f) => f !== ficha); // Remover la ficha del arreglo
       this.colocarFichaEnTablero(ficha, col);
       this.jugadorActual = 1; // Cambiar al jugador 1
     }
@@ -210,6 +209,13 @@ this.canvas.addEventListener('mouseup', () => {
 
 
 }
+
+//Le doy funcionalidad al boton reiniciar!
+
+let btnReiniciar = document.getElementById('reiniciar');
+btnReiniciar.addEventListener('click', function() {  
+  reiniciarJuego(tablero); 
+});
 
 const tablero = new Tablero();
 
@@ -288,21 +294,23 @@ function verificarGanador(tablero) {
     // El jugador 1 gana.
     alert("JUGADOR 1 GANA!");
     console.log("¡Jugador 1 gana!");
-    reiniciarJuego(tablero);
-    tablero.inicializarFichas(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
+    //reiniciarJuego(tablero);
+   // tablero.inicializarFichas(); //CUANDO ALGUIEN GANA SE TIENEN QUE INICIALIZAR LAS FICHAS DEL COSTADO
   } else if (verificarGanadorVertical(tablero, 2) || verificarGanadorHorizontal(tablero, 2) || verificarGanadorDiagonal(tablero, 2)) {
     // El jugador 2 gana.
     alert("JUGADOR 2 GANA!");
     console.log("¡Jugador 2 gana!");
-    reiniciarJuego(tablero);
-    tablero.inicializarFichas(); 
+    //reiniciarJuego(tablero);
+   // tablero.inicializarFichas(); 
   } else {
     // No hay ganador todavía. HACER EMPATE!
   }
 }
 
 function reiniciarJuego(tablero) {
+  tablero.inicializarTemporizador();
   tablero.inicializarTablero(); // Limpia las fichas del tablero.
   tablero.dibujarTablero(); // Vuelve a dibujar el tablero vacío.
+  tablero.inicializarFichas();
   tablero.jugadorActual = 1; // Vuelve a iniciar con el jugador 1.
 }
