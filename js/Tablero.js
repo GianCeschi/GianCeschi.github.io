@@ -3,8 +3,8 @@ class Tablero {
     this.canvas = document.getElementById('canvas');
     this.ctx = this.canvas.getContext('2d');
     this.celdas = [];
-    this.tableroWidth = 500; // Ancho deseado del tablero
-    this.tableroHeight = 500; // Alto deseado del tablero  ESTO PARA DARLE UN TAMAÑO AL TABLERO QUE NO SEA DE TODO EL CANVAS
+    this.tableroWidth = 500; // Ancho del tablero
+    this.tableroHeight = 500; // Alto del tablero -- ESTO PARA DARLE UN TAMAÑO AL TABLERO QUE NO SEA DE TODO EL CANVAS
    
     this.anchoCelda = this.tableroWidth / this.columnas;
     this.altoCelda = this.tableroHeight / this.filas;
@@ -13,9 +13,6 @@ class Tablero {
     this.fichasJugador1 = [];  
     this.fichasJugador2 = [];
     this.juegoTerminado = false; //PARA FRENAR EL TEMPORIZADOR SI HAY GANADOR
-
-    // Inicializa el temporizador
-    //this.inicializarTemporizador();
     
     this.fichaSeleccionada = null;
    
@@ -30,7 +27,7 @@ class Tablero {
     this.temporizador = document.getElementById('tiempo');
     clearInterval(this.temporizadorInterval); // Detiene el intervalo anterior si existe. Porque sino avanza cada vez mas rapido el reloj
   
-    const intervalo = 1000; // Intervalo de actualización del temporizador en milisegundos (1 segundo)
+    const intervalo = 1000; // Intervalo de actualización del temporizador en segundos
   
     const actualizarTemporizador = () => {
   
@@ -89,6 +86,13 @@ class Tablero {
         this.ctx.strokeRect(x, y, this.anchoCelda, this.altoCelda);
       }
     }
+    //Indico de quien es el turno!!
+    this.ctx.fillStyle = 'green';
+    this.ctx.font = 'bold 15px Roboto';
+    this.ctx.fillText(`Jugador 2`, 570, this.tableroHeight - 488);
+    this.ctx.fillText(`Jugador 1`, 720, this.tableroHeight - 488);
+    this.ctx.fillText(`Jugador ${this.jugadorActual}`, 640, this.tableroHeight - 45);
+    this.ctx.fillText(`Tu Turno`, 640, this.tableroHeight - 25);
   }
 
 
@@ -350,6 +354,11 @@ function reiniciarJuego(tablero) {
   tablero.inicializarTemporizador();
   tablero.inicializarTablero(); // Limpia las fichas del tablero.
   tablero.dibujarTablero(); // Vuelve a dibujar el tablero vacío.
+
+   // Reinicia los arreglos de fichas. Esto lo hago porque cuando cambio la modalidad en linea quedan las fichas anteriores.
+   tablero.fichasJugador1 = [];
+   tablero.fichasJugador2 = [];
+
   tablero.inicializarFichas();
   tablero.jugadorActual = 1; // Vuelve a iniciar con el jugador 1.
 }
